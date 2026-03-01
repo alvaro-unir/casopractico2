@@ -1,0 +1,31 @@
+---
+- name: Setup ACR and upload images
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Pull, tag and push images to ACR
+      ansible.builtin.include_role:
+        name: acr
+
+- name: Configure VM web server
+  hosts: webapp
+  gather_facts: true
+  become: true
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Install Podman and deploy web server container
+      ansible.builtin.include_role:
+        name: vm
+
+- name: Deploy application to AKS
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Create namespace and deploy workloads in AKS
+      ansible.builtin.include_role:
+        name: aks

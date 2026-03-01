@@ -1,0 +1,72 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install Podman and htpasswd tooling
+  ansible.builtin.apt:
+    name:
+      - podman
+      - apache2-utils
+    state: present
+
+- name: Create directories for web server content and configuration
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ web_volume_root }}"
+    - "{{ web_volume_root }}/html"
+    - "{{ web_volume_root }}/auth"
+
+- name: Render web server landing page
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_volume_root }}/html/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render nginx configuration
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ web_volume_root }}/nginx.conf"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create HTTP basic auth credentials
+  ansible.builtin.command:
+    cmd: "htpasswd -bc {{ web_volume_root }}/auth/.htpasswd {{ web_basic_auth_user }} {{ web_basic_auth_password }}"
+  no_log: true
+  changed_when: true
+
+- name: Log in to Azure Container Registry from the VM
+  containers.podman.podman_login:
+    registry: "{{ acr_login_server }}"
+    username: "{{ acr_username }}"
+    password: "{{ acr_password }}"
+  no_log: true
+
+- name: Pull web server image from Azure Container Registry
+  containers.podman.podman_image:
+    name: "{{ acr_login_server }}/{{ web_image_name }}:{{ container_image_tag }}"
+    state: present
+
+- name: Run web server container with Podman
+  containers.podman.podman_container:
+    name: "{{ web_container_name }}"
+    image: "{{ acr_login_server }}/{{ web_image_name }}:{{ container_image_tag }}"
+    state: started
+    recreate: true
+    restart_policy: always
+    ports:
+      - "{{ web_container_port }}:80"
+    volumes:
+      - "{{ web_volume_root }}/html:/usr/share/nginx/html:Z"
+      - "{{ web_volume_root }}/nginx.conf:/etc/nginx/conf.d/default.conf:Z"
+      - "{{ web_volume_root }}/auth:/etc/nginx/auth:Z"

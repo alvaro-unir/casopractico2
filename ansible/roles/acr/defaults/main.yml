@@ -1,0 +1,8 @@
+---
+acr_images:
+  - source: "docker.io/library/nginx:1.27-alpine"
+    target: "{{ web_image_name }}"
+  - source: "docker.io/library/nginx:1.27-alpine"
+    target: "{{ app_frontend_image_name }}"
+  - source: "docker.io/library/redis:7-alpine"
+    target: "{{ app_backend_image_name }}"

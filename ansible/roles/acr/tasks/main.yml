@@ -1,0 +1,37 @@
+---
+- name: Update apt cache on control node
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Install Podman on control node
+  ansible.builtin.apt:
+    name: podman
+    state: present
+  become: true
+
+- name: Log in to Azure Container Registry
+  containers.podman.podman_login:
+    registry: "{{ acr_login_server }}"
+    username: "{{ acr_username }}"
+    password: "{{ acr_password }}"
+  no_log: true
+
+- name: Pull source images from public registry
+  containers.podman.podman_image:
+    name: "{{ item.source }}"
+    state: present
+  loop: "{{ acr_images }}"
+
+- name: Tag images for Azure Container Registry
+  ansible.builtin.command:
+    cmd: "podman tag {{ item.source }} {{ acr_login_server }}/{{ item.target }}:{{ container_image_tag }}"
+  loop: "{{ acr_images }}"
+  changed_when: true
+
+- name: Push images to Azure Container Registry
+  containers.podman.podman_image:
+    name: "{{ acr_login_server }}/{{ item.target }}:{{ container_image_tag }}"
+    push: true
+  loop: "{{ acr_images }}"

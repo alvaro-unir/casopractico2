@@ -1,0 +1,9 @@
+.terraform
+.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/.terraform.tfstate.lock.info
+ansible/private_key.pem
+ansible/secrets.yml
+ansible/.vault_pass
+ansible/*.retry
