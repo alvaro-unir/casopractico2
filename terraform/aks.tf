@@ -1,3 +1,4 @@
+# Cluster gestionado de AKS con un unico nodo para ajustar coste.
 resource "azurerm_kubernetes_cluster" "aks" {
   name                              = var.aks_name
   location                          = azurerm_resource_group.rg.location
@@ -18,6 +19,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+# Permiso para que AKS pueda hacer pull de imagenes desde el ACR.
 resource "azurerm_role_assignment" "aks_acr_pull" {
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"

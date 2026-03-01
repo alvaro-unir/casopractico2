@@ -1,4 +1,5 @@
 ---
+# Primero se construyen y suben las imagenes al ACR.
 - name: Setup ACR and upload images
   hosts: localhost
   gather_facts: false
@@ -9,6 +10,7 @@
       ansible.builtin.include_role:
         name: acr
 
+# Despues la VM descarga su imagen desde ACR y arranca el contenedor web.
 - name: Configure VM web server
   hosts: webapp
   gather_facts: true
@@ -20,6 +22,7 @@
       ansible.builtin.include_role:
         name: vm
 
+# Por ultimo se despliega la aplicacion de AKS usando las mismas credenciales del registry.
 - name: Deploy application to AKS
   hosts: localhost
   gather_facts: false

@@ -1,3 +1,4 @@
+# Red base donde se desplegara la VM y su IP publica.
 resource "azurerm_virtual_network" "vm_vnet" {
   name                = var.vnet_name
   location            = azurerm_resource_group.rg.location
@@ -90,11 +91,13 @@ resource "azurerm_network_interface_security_group_association" "vm_nic_nsg" {
   network_security_group_id = azurerm_network_security_group.vm_nsg.id
 }
 
+# La clave privada se genera en Terraform para reutilizarla luego en Ansible.
 resource "tls_private_key" "ssh_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
+# VM Linux que alojara el contenedor web gestionado con Podman.
 resource "azurerm_linux_virtual_machine" "vm" {
   name                            = var.vm_name
   location                        = azurerm_resource_group.rg.location
@@ -110,6 +113,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     public_key = tls_private_key.ssh_key.public_key_openssh
   }
 
+  # Disco sencillo para la practica, priorizando coste frente a rendimiento.
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"

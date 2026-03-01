@@ -17,6 +17,7 @@
     cmd: "az aks get-credentials --resource-group {{ resource_group_name }} --name {{ aks_name }} --overwrite-existing"
   changed_when: true
 
+# Namespace aislado para no mezclar la aplicacion con otros recursos del cluster.
 - name: Create application namespace
   kubernetes.core.k8s:
     state: present
@@ -31,6 +32,7 @@
     acr_dockerconfigjson: "{{ {'auths': {acr_login_server: {'username': acr_username, 'password': acr_password, 'auth': (acr_username ~ ':' ~ acr_password) | b64encode}}} | to_json | b64encode }}"
   no_log: true
 
+# Este secret permite que los pods hagan pull de imagenes privadas del ACR.
 - name: Create image pull secret for ACR
   kubernetes.core.k8s:
     state: present

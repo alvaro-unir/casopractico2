@@ -1,8 +1,10 @@
 ---
+# Cada imagen se construye en un directorio distinto para respetar la separacion pedida en el enunciado.
+acr_build_root: "{{ playbook_dir }}/.build"
 acr_images:
-  - source: "docker.io/library/nginx:1.27-alpine"
-    target: "{{ web_image_name }}"
-  - source: "docker.io/library/nginx:1.27-alpine"
-    target: "{{ app_frontend_image_name }}"
-  - source: "docker.io/library/redis:7-alpine"
-    target: "{{ app_backend_image_name }}"
+  - name: "{{ web_image_name }}"
+    build_dir: "{{ acr_build_root }}/webserver"
+  - name: "{{ app_frontend_image_name }}"
+    build_dir: "{{ acr_build_root }}/frontend"
+  - name: "{{ app_backend_image_name }}"
+    build_dir: "{{ acr_build_root }}/backend"

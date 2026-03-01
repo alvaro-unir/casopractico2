@@ -1,3 +1,6 @@
+############################
+# Credenciales de Azure
+############################
 variable "subscription_id" {
   description = "ID de la suscripcion de Azure."
   type        = string
@@ -22,6 +25,9 @@ variable "resource_group_name" {
   default     = "rg-casopractico2"
 }
 
+############################
+# Red y VM
+############################
 variable "vnet_name" {
   description = "Nombre de la red virtual."
   type        = string
@@ -82,6 +88,9 @@ variable "vm_admin_username" {
   default     = "azureuser"
 }
 
+############################
+# ACR y AKS
+############################
 variable "acr_name" {
   description = "Nombre del Azure Container Registry."
   type        = string

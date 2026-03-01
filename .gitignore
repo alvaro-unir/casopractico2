@@ -7,3 +7,4 @@ ansible/private_key.pem
 ansible/secrets.yml
 ansible/.vault_pass
 ansible/*.retry
+ansible/.build/
